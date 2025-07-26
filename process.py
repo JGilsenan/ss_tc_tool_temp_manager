@@ -19,7 +19,6 @@ class ToolchangerPostprocessor:
 
     def read_input_file(self) -> list[str]:
         try:
-            print(f"Reading file: {self._input_file_path}")
             with open(self._input_file_path, "r", encoding='UTF-8') as readfile:
                 return readfile.readlines()
         except ReadError as exc:

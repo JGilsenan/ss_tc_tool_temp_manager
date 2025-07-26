@@ -1,0 +1,7 @@
+{
+  // Auto save when editor loses focus
+  "files.autoSave": "onFocusChange",
+  
+  // Line length indicator at 88 characters
+  "editor.rulers": [88]
+} 
