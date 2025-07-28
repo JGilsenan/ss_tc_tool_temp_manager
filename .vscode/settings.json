@@ -2,6 +2,16 @@
   // Auto save when editor loses focus
   "files.autoSave": "onFocusChange",
   
-  // Line length indicator at 88 characters
-  "editor.rulers": [88]
+  // Line length indicator at 90 characters
+  "editor.rulers": [90],
+  
+  // Stop aggressive behaviors but keep basic suggestions
+  "editor.acceptSuggestionOnEnter": "smart",
+  "editor.tabCompletion": "off",
+  "editor.acceptSuggestionOnCommitCharacter": false,
+  "editor.suggest.insertMode": "replace",
+  "editor.suggest.snippetsPreventQuickSuggestions": true,
+  
+  // Allow auto-closing quotes for docstrings
+  "editor.autoClosingQuotes": "always"
 } 
