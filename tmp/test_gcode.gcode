@@ -3583,9 +3583,7 @@ M204 S2000
 G1 X139.154 Y158.678
 G1 Z0.25
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Skirt
 ;WIDTH:0.4
@@ -3654,9 +3652,7 @@ G1 X213.176 Y167.543
 ; end travel
 G1 Z0.25
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal perimeter
 ;WIDTH:0.5
@@ -3680,9 +3676,7 @@ G1 X214.068 Y135.028 E1.54985
 G1 X214.068 Y168.436 E1.54985
 M204 S1000
 G1 X214.515 Y168.882 F27000
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:External perimeter
 G1 F1800
@@ -3702,9 +3696,7 @@ G1 X212.482 Y141.554
 M204 S2000
 G1 X212.14 Y136.055
 ; end travel
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Solid infill
 ;WIDTH:0.49441
@@ -4035,9 +4027,7 @@ G1 X177.335 Y130.864
 ; end travel
 G1 Z0.25
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-1
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Skirt
 ;WIDTH:0.4
@@ -4102,9 +4092,7 @@ G1 X206.311 Y211.311
 ; end travel
 G1 Z0.25
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-1
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal perimeter
 ;WIDTH:0.5
@@ -4129,9 +4117,7 @@ G1 X207.204 Y178.796 E1.54985
 G1 X207.204 Y212.204 E1.54985
 M204 S1000
 G1 X207.65 Y212.65 F27000
-; custom gcode: feature_gcode
-1
-; custom gcode end: feature_gcode
+
 
 ;TYPE:External perimeter
 G1 F1800
@@ -4151,9 +4137,7 @@ G1 X205.617 Y185.322
 M204 S2000
 G1 X205.275 Y179.823
 ; end travel
-; custom gcode: feature_gcode
-1
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Solid infill
 ;WIDTH:0.49441
@@ -4483,9 +4467,7 @@ G1 X173.067 Y216.453
 ; end travel
 G1 Z0.25
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-2
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Skirt
 ;WIDTH:0.4
@@ -4547,9 +4529,7 @@ G1 X166.65 Y187.15
 ; end travel
 G1 Z0.25
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-2
-; custom gcode end: feature_gcode
+
 
 ;TYPE:External perimeter
 ;WIDTH:0.5
@@ -4569,9 +4549,7 @@ G1 X165.73 Y167.023
 M204 S2000
 G1 X165.614 Y162.984
 ; end travel
-; custom gcode: feature_gcode
-2
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Solid infill
 ;WIDTH:0.492744
@@ -4847,9 +4825,7 @@ G1 X139.861 Y190.115
 ; end travel
 G1 Z0.45
 G1 E10.000000 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Skirt
 ;WIDTH:0.4
@@ -4889,9 +4865,7 @@ G1 X213.527 Y167.894
 ; end travel
 G1 Z0.45
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal perimeter
 G1 F9000
@@ -4914,9 +4888,7 @@ G1 X214.241 Y134.856 E1.00215
 G1 X214.241 Y168.608 E1.00216
 M204 S1000
 G1 X214.598 Y168.965 F27000
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:External perimeter
 G1 F4800
@@ -4935,9 +4907,7 @@ G1 X213.728 Y167.498
 M204 S5000
 G1 X213.412 Y166.734
 ; end travel
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Solid infill
 ;WIDTH:0.555808
@@ -5227,9 +5197,7 @@ G1 X179.865 Y131.059
 ; end travel
 G1 Z0.45
 G1 E10.000000 F1800
-; custom gcode: feature_gcode
-1
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Skirt
 ;WIDTH:0.4
@@ -5268,9 +5236,7 @@ G1 X207.733 Y212.733
 ; end travel
 G1 Z0.45
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-1
-; custom gcode end: feature_gcode
+
 
 ;TYPE:External perimeter
 G1 F4800
@@ -5284,9 +5250,7 @@ G1 X207.387 Y212.533 F27000
 ;WIPE_END
 M204 S2000
 G1 X206.904 Y212.626
-; custom gcode: feature_gcode
-1
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Top solid infill
 ;WIDTH:0.396729
@@ -5741,9 +5705,7 @@ G1 X139.861 Y190.115
 ; end travel
 G1 Z0.65
 G1 E10.000000 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Skirt
 ;WIDTH:0.4
@@ -5804,9 +5766,7 @@ G1 X213.56 Y167.927
 ; end travel
 G1 Z0.65
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal perimeter
 G1 F9000
@@ -5829,9 +5789,7 @@ G1 X214.274 Y134.822 E1.00414
 G1 X214.274 Y168.642 E1.00413
 M204 S1000
 G1 X214.631 Y168.999 F27000
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:External perimeter
 G1 F4800
@@ -5850,9 +5808,7 @@ G1 X213.109 Y148.126
 M204 S5000
 G1 X212.4 Y135.652
 ; end travel
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Solid infill
 ;WIDTH:0.555866
@@ -6143,9 +6099,7 @@ G1 X177.751 Y131.418
 ; end travel
 G1 Z0.85
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Skirt
 ;WIDTH:0.4
@@ -6208,9 +6162,7 @@ G1 X213.594 Y167.961
 ; end travel
 G1 Z0.85
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal perimeter
 G1 F9000
@@ -6232,9 +6184,7 @@ G1 X214.308 Y134.789 E1.00612
 G1 X214.308 Y168.675 E1.00611
 M204 S1000
 G1 X214.665 Y169.032 F27000
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:External perimeter
 G1 F4800
@@ -6253,9 +6203,7 @@ G1 X213.795 Y167.565
 M204 S5000
 G1 X213.478 Y166.8
 ; end travel
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Solid infill
 ;WIDTH:0.555723
@@ -6550,9 +6498,7 @@ G1 X179.865 Y130.713
 ; end travel
 G1 Z1.05
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Skirt
 ;WIDTH:0.4
@@ -6613,9 +6559,7 @@ G1 X213.594 Y167.961
 ; end travel
 G1 Z1.05
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal perimeter
 G1 F9000
@@ -6637,9 +6581,7 @@ G1 X214.308 Y134.789 E1.00612
 G1 X214.308 Y168.675 E1.00611
 M204 S1000
 G1 X214.665 Y169.032 F27000
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:External perimeter
 G1 F4800
@@ -6659,9 +6601,7 @@ G1 X213.143 Y148.117
 M204 S5000
 G1 X212.433 Y135.618
 ; end travel
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Solid infill
 ;WIDTH:0.555723
@@ -6955,9 +6895,7 @@ G1 X177.751 Y131.418
 ; end travel
 G1 Z1.25
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Skirt
 ;WIDTH:0.4
@@ -7019,9 +6957,7 @@ G1 X213.594 Y167.961
 ; end travel
 G1 Z1.25
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal perimeter
 G1 F9000
@@ -7044,9 +6980,7 @@ G1 X214.308 Y134.789 E1.00612
 G1 X214.308 Y168.675 E1.00611
 M204 S1000
 G1 X214.665 Y169.032 F27000
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:External perimeter
 G1 F4800
@@ -7065,9 +6999,7 @@ G1 X213.78 Y168.215
 M204 S7000
 G1 X213.325 Y167.692
 ; end travel
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal infill
 ;WIDTH:0.64
@@ -7363,9 +7295,7 @@ G1 X218.384 Y134.232
 ; end travel
 G1 Z1.45
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Skirt
 ;WIDTH:0.4
@@ -7426,9 +7356,7 @@ G1 X213.594 Y167.961
 ; end travel
 G1 Z1.45
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal perimeter
 G1 F9000
@@ -7451,9 +7379,7 @@ G1 X214.308 Y134.789 E1.00612
 G1 X214.308 Y168.675 E1.00611
 M204 S1000
 G1 X214.665 Y169.032 F27000
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:External perimeter
 G1 F4800
@@ -7472,9 +7398,7 @@ G1 X213.78 Y168.215
 M204 S7000
 G1 X213.325 Y167.692
 ; end travel
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal infill
 ;WIDTH:0.64
@@ -7770,9 +7694,7 @@ G1 X218.384 Y134.232
 ; end travel
 G1 Z1.65
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Skirt
 ;WIDTH:0.4
@@ -7833,9 +7755,7 @@ G1 X213.594 Y167.961
 ; end travel
 G1 Z1.65
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal perimeter
 G1 F9000
@@ -7857,9 +7777,7 @@ G1 X214.308 Y134.789 E1.00612
 G1 X214.308 Y168.675 E1.00611
 M204 S1000
 G1 X214.665 Y169.032 F27000
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:External perimeter
 G1 F4800
@@ -7879,9 +7797,7 @@ G1 X213.78 Y168.215
 M204 S7000
 G1 X213.325 Y167.692
 ; end travel
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal infill
 ;WIDTH:0.64
@@ -8178,9 +8094,7 @@ G1 X218.384 Y134.232
 ; end travel
 G1 Z1.85
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Skirt
 ;WIDTH:0.4
@@ -8241,9 +8155,7 @@ G1 X213.594 Y167.961
 ; end travel
 G1 Z1.85
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal perimeter
 G1 F9000
@@ -8265,9 +8177,7 @@ G1 X214.308 Y134.789 E1.00612
 G1 X214.308 Y168.675 E1.00611
 M204 S1000
 G1 X214.665 Y169.032 F27000
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:External perimeter
 G1 F4800
@@ -8287,9 +8197,7 @@ G1 X213.78 Y168.215
 M204 S7000
 G1 X213.325 Y167.692
 ; end travel
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal infill
 ;WIDTH:0.64
@@ -8584,9 +8492,7 @@ G1 X218.384 Y134.232
 ; end travel
 G1 Z2.05
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Skirt
 ;WIDTH:0.4
@@ -8648,9 +8554,7 @@ G1 X213.594 Y167.961
 ; end travel
 G1 Z2.05
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal perimeter
 G1 F9000
@@ -8672,9 +8576,7 @@ G1 X214.308 Y134.789 E1.00612
 G1 X214.308 Y168.675 E1.00611
 M204 S1000
 G1 X214.665 Y169.032 F27000
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:External perimeter
 G1 F4800
@@ -8694,9 +8596,7 @@ G1 X213.78 Y168.215
 M204 S7000
 G1 X213.325 Y167.692
 ; end travel
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal infill
 ;WIDTH:0.64
@@ -8991,9 +8891,7 @@ G1 X218.384 Y134.232
 ; end travel
 G1 Z2.25
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Skirt
 ;WIDTH:0.4
@@ -9055,9 +8953,7 @@ G1 X213.594 Y167.961
 ; end travel
 G1 Z2.25
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal perimeter
 G1 F9000
@@ -9079,9 +8975,7 @@ G1 X214.308 Y134.789 E1.00612
 G1 X214.308 Y168.675 E1.00611
 M204 S1000
 G1 X214.665 Y169.032 F27000
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:External perimeter
 G1 F4800
@@ -9100,9 +8994,7 @@ G1 X193.128 Y168.195
 M204 S5000
 G1 X181.769 Y167.853
 ; end travel
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal bridge infill
 ;WIDTH:0.368782
@@ -9263,9 +9155,7 @@ G1 X218.384 Y134.232
 ; end travel
 G1 Z2.45
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Skirt
 ;WIDTH:0.4
@@ -9327,9 +9217,7 @@ G1 X213.594 Y167.961
 ; end travel
 G1 Z2.45
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal perimeter
 G1 F9000
@@ -9351,9 +9239,7 @@ G1 X214.308 Y134.789 E1.00612
 G1 X214.308 Y168.675 E1.00611
 M204 S1000
 G1 X214.665 Y169.032 F27000
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:External perimeter
 G1 F4800
@@ -9372,9 +9258,7 @@ G1 X213.795 Y167.565
 M204 S5000
 G1 X213.478 Y166.8
 ; end travel
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Solid infill
 ;WIDTH:0.555723
@@ -9669,9 +9553,7 @@ G1 X179.865 Y130.713
 ; end travel
 G1 Z2.65
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Skirt
 ;WIDTH:0.4
@@ -9732,9 +9614,7 @@ G1 X213.594 Y167.961
 ; end travel
 G1 Z2.65
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal perimeter
 G1 F9000
@@ -9756,9 +9636,7 @@ G1 X214.308 Y134.789 E1.00612
 G1 X214.308 Y168.675 E1.00611
 M204 S1000
 G1 X214.665 Y169.032 F27000
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:External perimeter
 G1 F4800
@@ -9778,9 +9656,7 @@ G1 X213.143 Y148.117
 M204 S5000
 G1 X212.433 Y135.618
 ; end travel
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Solid infill
 ;WIDTH:0.555723
@@ -10075,9 +9951,7 @@ G1 X177.751 Y131.418
 ; end travel
 G1 Z2.85
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Skirt
 ;WIDTH:0.4
@@ -10138,9 +10012,7 @@ G1 X213.594 Y167.961
 ; end travel
 G1 Z2.85
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Internal perimeter
 G1 F9000
@@ -10163,9 +10035,7 @@ G1 X214.308 Y134.789 E1.00612
 G1 X214.308 Y168.675 E1.00611
 M204 S1000
 G1 X214.665 Y169.032 F27000
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:External perimeter
 G1 F4800
@@ -10184,9 +10054,7 @@ G1 X213.795 Y167.565
 M204 S5000
 G1 X213.478 Y166.8
 ; end travel
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Solid infill
 ;WIDTH:0.555723
@@ -10480,9 +10348,7 @@ G1 X179.865 Y130.713
 ; end travel
 G1 Z3.05
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Skirt
 ;WIDTH:0.4
@@ -10544,9 +10410,7 @@ G1 X214.665 Y169.032
 ; end travel
 G1 Z3.05
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:External perimeter
 G1 F4800
@@ -10569,9 +10433,7 @@ G1 X213.836 Y134.539
 ; end travel
 G1 Z3.05
 G1 E0.5 F1800
-; custom gcode: feature_gcode
-0
-; custom gcode end: feature_gcode
+
 
 ;TYPE:Top solid infill
 ;WIDTH:0.39672
