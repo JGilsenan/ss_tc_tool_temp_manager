@@ -2,6 +2,12 @@
 import sys
 from shutil import ReadError
 
+
+CFG_TIME_BEFORE_PREHEAT_S: int = 60
+CFG_OFF_TIME_TO_GO_DORMANT_S: int = 120
+
+
+
 class ToolConfig:
     bed_temperature: int
     first_layer_bed_temperature: int
@@ -9,53 +15,6 @@ class ToolConfig:
     first_layer_temperature: int
     chamber_temperature: int
 
-    _first_layer_used: int
-    _last_layer_used: int
-    _in_layer_group: bool
-    _current_layer_group: tuple[int, int]
-    _layer_groups: list[tuple[int, int]]
-
-    def __init__(self) -> None:
-        """
-        Initialize the ToolConfig class.
-        """
-        self._first_layer_used = -1
-        self._last_layer_used = -1
-        self._in_layer_group = False
-        self._current_layer_group = (0, 0)
-        self._layer_groups = []
-
-    def mark_as_used_on_layer(self, layer_idx: int) -> None:
-        """
-        Mark the tool as used on a given layer.
-        """
-        # check if new min/max layer used
-        if self._first_layer_used == -1:
-            self._first_layer_used = layer_idx
-            self._last_layer_used = layer_idx
-        elif layer_idx > self._last_layer_used:
-            self._last_layer_used = layer_idx
-        # check if in layer group
-        if self._in_layer_group:
-            if layer_idx > self._current_layer_group[1]:
-                self._current_layer_group = (self._current_layer_group[0], layer_idx)
-        else:
-            self._start_new_layer_group(layer_idx)
-
-    def _start_new_layer_group(self, layer_idx: int) -> None:
-        """
-        Start a new layer group.
-        """
-        self._in_layer_group = True
-        self._current_layer_group = (layer_idx, layer_idx)
-    
-    def resolve_layer_groups(self) -> None:
-        """
-        Resolve the layer groups.
-        """
-        self._layer_groups.append(self._current_layer_group)
-        self._in_layer_group = False
-        self._current_layer_group = (0, 0)
 
 '''
 TODO: STOPPED HERE
@@ -66,25 +25,105 @@ TODO: STOPPED HERE
 TODO: STOPPED HERE
 TODO: STOPPED HERE
 TODO: STOPPED HERE
+TODO: STOPPED HERE
 
-implementing a tool grouping logic
+NOTE: remember, if it is not used, then don't implement it, only once used
+and there are things listed here that are not used, so don't implement them
+without verifying that they are needed
 
-next let's do a simple mapping of tool usage across the board, so basically:
-- start at the beginning of the file, establish current tool, and start tracking a tool usage session
-- defining usage session as time it is picked up (or print begins for T0) to when it is dropped off
-- count the non-comment lines, or alternatively, use a pattern match for commands that block
-- we're going to use this as a score for each tool, understanding of course that this is 
-    not a perfect metric, as it ignores the time spent by each command, maybe we can find a way to
-    get that or a library or something, or just use the ai tool to write an algorithm.
-- we need to establish a proportional way of comparing two sessions, then use that and the time estimate 
-    to estimate the length of each session, which gives us time to tool needed, should be able to 
-    use that to fairly precisely placing warmup start times.
-        - can take it a step further and have a user determined time to heat estimate for each tool
-
-
-
+NOTE NOTE NOTE: starting notes
+- start section: 
+    - TODO: still need to sort this out
+    - the section parsing will still have a "virtual" section at the head of the list
+      this is to keep it consistent for the algorithm
+    - this section will also handle the initial preheating, temp setting, etc so that the algo
+      described below can just begin running as if there was a previous section
+    - this work will be done by first chopping off the start and setting it aside, then doing
+        this work, then doing the start because the other work was necessary to do the start
 
 
+- start with raw lines with both ends chopped off, basically first printing to last printing
+- filtered down such that all that remains are:
+    - actual gcode commands
+    - custom gcode blocks
+    - layer change comments
+    - exclude object commands
+
+
+- next break it into sections which are groups of lines
+- section breaks occur at:
+    - the start obviously
+    - the end obviously
+    - layer changes
+    - custom gcode blocks
+    - really any non g-code line, including:
+        - EXCLUDE_OBJECT_START
+        - EXCLUDE_OBJECT_END
+        - M73 lines, you can also probably get information from these as they give estimates 
+          on % complete and time remaining
+            - TODO this, because you can just assume the slicer knew better and then use these
+              for interpolating the score for the sections in between M73 commands TODO this
+        - any other non movement gcode lines
+
+- store the sections in a class consisting of:
+    - the actual lines in the section
+    - whether the section is scored or not/the score of the section
+    - the tool for the section (reference to the tool config)
+    - the layer number for the section
+    - the layer height for the section
+    - the approximate duration of the section
+    - there will be special fields for the different types of custom gcode blocks
+    - the index of the section in the list of sections
+    - if the section is virtual (meaning not kept, really this means the artificially added section for the start tool selection)
+
+- store these in a LINKED list of sections
+
+- next, you can create a list of sections that are for tool changes
+
+- then for each tool change you determine:
+    - for outgoing tool:
+        - is off?
+        - is dormant?
+        - etc
+    - for incoming tool:
+        - when to preheat?
+        - etc
+    - these all result in actions, each of which has a calculated position
+    - each action results in the creation of a new section for the action
+    - these are inserted into the sections linked list, and split whichever section they land on 
+        in two, with this one inserted in between
+            - this is necessary because otherwise it messes up your ability to accurately 
+                split sections with action sections
+
+- finally, you can reconstruct the gcode file from the linked list of sections
+
+- next, you will have enough information to do an intelligent start section
+
+NOTE TODO make sure you don't get rid of all of those comments, honeslty probably keep em all, 
+you don't know what klipper might use them for
+
+
+
+
+TODO: add to the start filament custom gcode section the preheat time for the tool
+TODO: ^ this!
+TODO: ^ this!
+TODO: ^ this!
+TODO: ^ this!
+
+TODO: need to make this configurable, create a config file
+
+TODO: when you print multicolor no T0, there's nothing forcing a start with T0, that should 
+definitely be forced here, or otherwise you can just do it in your macro, no no, let's force 
+it here AND encourage folks to do it in macros
+
+TODO: on the same note of setting the warmup time, you could easily use this or another post
+process script to define extra variables then make them available to the user in the custom 
+gcode section. This script could do replacement based on what the user puts. Sort of a way to 
+extend the slicer's capabilities.
+    Like, for example, you could make this script allow the user to use prusaslicer's is 
+    tool used variable, well, they'd have to do it as a comment to not piss off the slicer, 
+    but that's fine and easy enough of an ask.
 
 '''
 
@@ -158,7 +197,7 @@ class ToolchangerPostprocessor:
         # eliminate unneeded blank lines
         self._eliminate_blank_lines()
         # dump comments and images at top of file into output list
-        self._process_comments_and_images()
+        self._process_comments_and_images_at_start_of_file()
         # process block before print start
         self._process_block_before_print_start()
         # extract slicer configs section
@@ -169,22 +208,28 @@ class ToolchangerPostprocessor:
         self._extract_print_stats_section()
         # parse print stats
         self._parse_print_stats()
+        # remove unneeded comments
+        self._remove_unneeded_comments()
+
         # extract end print section
         self._extract_end_gcode_section()
+        # process end print section
+        self._process_end_print_section()
+
         # find tools used in print
         self._find_tools_used_in_print()
         # eliminate ss pre toolchange tool temp drop
         self._eliminate_ss_pre_toolchange_tool_temp_drop()
 
         # # TODO: temp
-        # for line in self._raw_lines:
-        #     self._output_lines.append(line)
+        for line in self._raw_lines:
+            self._output_lines.append(line)
         # # TODO: temp
 
         self._reconstruct_for_output()
         self._write_output_file()
 
-    def _process_comments_and_images(self) -> None:
+    def _process_comments_and_images_at_start_of_file(self) -> None:
         """
         Takes all lines up to the first `M73` and immediately dumps them to output list
         as these are comments and images that are not relevant to the script
@@ -361,7 +406,42 @@ class ToolchangerPostprocessor:
         self._end_print_section = self._raw_lines[idx_m107:]
         # remove the M107 line from the raw lines list and anything after it
         self._raw_lines = self._raw_lines[:idx_m107]
+    
+    def _process_end_print_section(self) -> None:
+        """
+        Process the end print section.
 
+        The only thing needed here is to remove the current tool line that is at the
+        start of each end_filament_gcode subsection
+        """
+        output_lines: list[str] = []
+        prev_line_is_end_filament_gcode: bool = False
+        for line in self._end_print_section:
+            if line.startswith('; custom gcode: end_filament_gcode'):
+                prev_line_is_end_filament_gcode = True
+            elif prev_line_is_end_filament_gcode:
+                prev_line_is_end_filament_gcode = False
+                continue
+            output_lines.append(line)
+        self._end_print_section = output_lines
+
+
+    def _remove_unneeded_comments(self) -> None:
+        """
+        Remove unneeded comments from the raw lines list.
+
+        Keep only comments that start with '; custom gcode' or ';TYPE:'
+        """
+        output_lines: list[str] = []
+        for line in self._raw_lines:
+            if line.startswith(';'):
+                if not line.startswith('; custom gcode') and \
+                        not line.startswith(';LAYER_CHANGE') and \
+                        not line.startswith(';Z:') and \
+                        not line.startswith(';HEIGHT:'):
+                    continue
+            output_lines.append(line)
+        self._raw_lines = output_lines
 
 
     def _reconstruct_for_output(self) -> None:
@@ -372,10 +452,6 @@ class ToolchangerPostprocessor:
 
         # add the end print section
         self._output_lines = self._output_lines + self._end_print_section
-        # add the print stats section
-        self._output_lines = self._output_lines + self._print_stats
-        # finally, add the ss configs section
-        self._output_lines = self._output_lines + self._ss_configs
 
 
 def main(args) -> None:
@@ -390,7 +466,7 @@ def main(args) -> None:
         print("No file path provided, exiting now.")
         sys.exit(1)
     
-    # processor: ToolchangerPostprocessor = ToolchangerPostprocessor(sys.argv[1])
-    # processor.process_gcode()
+    processor: ToolchangerPostprocessor = ToolchangerPostprocessor(sys.argv[1])
+    processor.process_gcode()
 
 main(sys.argv)

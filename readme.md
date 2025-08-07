@@ -99,32 +99,16 @@ First and foremost, this is not a comprehensive guide to setting up ss for multi
         - the first line in this section must be `{current_extruder}`
         - the second line in this section must be `{next_extruder}`
         - there must be nothing else in this section that is related to tool changes, other things are fine, just do not include code to trigger the tool change, that will be inserted by this script
-    - between extrusion role change g-code:
-        - the very first line in this section must be `{current_extruder}`
-        - anything else you may have had in this section is fine, it just has to go after the first line
-        - this is necessary because ss will only insert this into the output if there is something in this section, and we want it in the output for this script to find
 
 
 
-
-# TODOs and things to address
-
-**RESOLVE ASAP**
-- when you print multicolor no T0, there's nothing forcing a start with T0, that should definitely be forced here, or otherwise you can just do it in your macro, no no, let's force it here AND encourage folks to do it in macros
-
-- need to make this configurable, create a config file 
+-  
 
 =====================================================================================
 =====================================================================================
 =====================================================================================
 =====================================================================================
 =====================================================================================
-Examples:
-the complicated one from the prusa docs:
-https://github.com/foreachthing/Slic3rPostProcessing/blob/a47d64c8b83459cf3bd2906a3e81172c07328f34/SPP-Python/Slic3rPostProcessor.py#L212
-
-a simple one:
-https://github.com/johnnyruz/PrusaScripts/blob/master/postprocess_mmutempchange.py
 
 
 # how to notes
