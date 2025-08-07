@@ -188,6 +188,11 @@ class ToolchangerPostprocessor:
         """
         Process the gcode file.
         """
+        # only process if there is a tool change in the gcode
+        if not self._has_tool_change_in_gcode():
+            print('No tool change in gcode, exiting now.')
+            sys.exit(0)
+
         # eliminate unneeded blank lines
         self._eliminate_blank_lines()
         # dump comments and images at top of file into output list
@@ -207,8 +212,6 @@ class ToolchangerPostprocessor:
 
         # extract end print section
         self._extract_end_gcode_section()
-        # process end print section
-        self._process_end_gcode_section()
 
         # find tools used in print
         self._find_tools_used_in_print()
@@ -222,6 +225,15 @@ class ToolchangerPostprocessor:
 
         self._reconstruct_for_output()
         self._write_output_file()
+
+    def _has_tool_change_in_gcode(self) -> bool:
+        """
+        Checks if the gcode has a tool change.
+        """
+        for line in self._raw_lines:
+            if line.startswith('; custom gcode: toolchange_gcode'):
+                return True
+        return False
 
     def _process_comments_and_images_at_start_of_file(self) -> None:
         """
@@ -372,24 +384,6 @@ class ToolchangerPostprocessor:
         # remove the M107 line from the raw lines list and anything after it
         self._raw_lines = self._raw_lines[:idx_m107]
     
-    def _process_end_gcode_section(self) -> None:
-        """
-        Process the end print section.
-
-        The only thing needed here is to remove the current tool line that is at the
-        start of each end_filament_gcode subsection
-        """
-        output_lines: list[str] = []
-        prev_line_is_end_filament_gcode: bool = False
-        for line in self._end_print_section:
-            if line.startswith('; custom gcode: end_filament_gcode'):
-                prev_line_is_end_filament_gcode = True
-            elif prev_line_is_end_filament_gcode:
-                prev_line_is_end_filament_gcode = False
-                continue
-            output_lines.append(line)
-        self._end_print_section = output_lines
-
     def _find_tools_used_in_print(self) -> None:
         """
         Find the tools used in the print.
@@ -445,7 +439,7 @@ def main(args) -> None:
         print("No file path provided, exiting now.")
         sys.exit(1)
     
-    # processor: ToolchangerPostprocessor = ToolchangerPostprocessor(sys.argv[1])
-    # processor.process_gcode()
+    processor: ToolchangerPostprocessor = ToolchangerPostprocessor(sys.argv[1])
+    processor.process_gcode()
 
 main(sys.argv)
