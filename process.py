@@ -3,8 +3,8 @@ import sys
 from shutil import ReadError
 
 
-CFG_TIME_BEFORE_PREHEAT_S: int = 60
-CFG_OFF_TIME_TO_GO_DORMANT_S: int = 120
+CFG_DEFAULT_TIME_BEFORE_PREHEAT_S: int = 60
+CFG_DEFAULT_OFF_TIME_TO_GO_DORMANT_S: int = 120
 
 
 
@@ -98,12 +98,6 @@ NOTE NOTE NOTE: starting notes
 - finally, you can reconstruct the gcode file from the linked list of sections
 
 - next, you will have enough information to do an intelligent start section
-
-NOTE TODO make sure you don't get rid of all of those comments, honeslty probably keep em all, 
-you don't know what klipper might use them for
-
-
-
 
 TODO: add to the start filament custom gcode section the preheat time for the tool
 TODO: ^ this!
@@ -200,21 +194,21 @@ class ToolchangerPostprocessor:
         self._process_comments_and_images_at_start_of_file()
         # process block before print start
         self._process_block_before_print_start()
+
         # extract slicer configs section
         self._extract_slicer_configs_section()
         # parse slicer configs
         self._parse_slicer_configs()
+
         # extract print stats section
         self._extract_print_stats_section()
         # parse print stats
         self._parse_print_stats()
-        # remove unneeded comments
-        self._remove_unneeded_comments()
 
         # extract end print section
         self._extract_end_gcode_section()
         # process end print section
-        self._process_end_print_section()
+        self._process_end_gcode_section()
 
         # find tools used in print
         self._find_tools_used_in_print()
@@ -362,35 +356,6 @@ class ToolchangerPostprocessor:
         """
         self._raw_lines = [line for line in self._raw_lines if line.strip()]
 
-    def _eliminate_ss_pre_toolchange_tool_temp_drop(self) -> None:
-        """
-        SS automatically adds a temperature drop to the current tool immediately before
-        a tool change, this eliminates those temperature commands so that this script 
-        can perform its own temperature management.
-        """
-        output_lines: list[str] = []
-        for i, line in enumerate(self._raw_lines):
-            if line.startswith('M104'):
-                next_line_check = (i + 1 < len(self._raw_lines) and 
-                                 self._raw_lines[i + 1].strip() == 
-                                 '; custom gcode: toolchange_gcode')
-                if next_line_check:
-                    continue
-            output_lines.append(line)
-        self._raw_lines = output_lines
-
-    def _find_tools_used_in_print(self) -> None:
-        """
-        Find the tools used in the print.
-        """
-        self._tools_used = []
-        for tool in range(self._tool_count_overall):
-            for line in self._raw_lines:
-                tool_name = f'T{tool}'
-                if tool_name in line:
-                    self._tools_used.append(tool)
-                    break
-
     def _extract_end_gcode_section(self) -> None:
         """
         Extracts the end of print section from the bottom of the raw lines list since this
@@ -407,7 +372,7 @@ class ToolchangerPostprocessor:
         # remove the M107 line from the raw lines list and anything after it
         self._raw_lines = self._raw_lines[:idx_m107]
     
-    def _process_end_print_section(self) -> None:
+    def _process_end_gcode_section(self) -> None:
         """
         Process the end print section.
 
@@ -425,23 +390,37 @@ class ToolchangerPostprocessor:
             output_lines.append(line)
         self._end_print_section = output_lines
 
-
-    def _remove_unneeded_comments(self) -> None:
+    def _find_tools_used_in_print(self) -> None:
         """
-        Remove unneeded comments from the raw lines list.
+        Find the tools used in the print.
+        """
+        self._tools_used = []
+        for tool in range(self._tool_count_overall):
+            for line in self._raw_lines:
+                tool_name = f'T{tool}'
+                if tool_name in line:
+                    self._tools_used.append(tool)
+                    break
 
-        Keep only comments that start with '; custom gcode' or ';TYPE:'
+    def _eliminate_ss_pre_toolchange_tool_temp_drop(self) -> None:
+        """
+        SS automatically adds a temperature drop to the current tool immediately before
+        a tool change, this eliminates those temperature commands so that this script 
+        can perform its own temperature management.
         """
         output_lines: list[str] = []
-        for line in self._raw_lines:
-            if line.startswith(';'):
-                if not line.startswith('; custom gcode') and \
-                        not line.startswith(';LAYER_CHANGE') and \
-                        not line.startswith(';Z:') and \
-                        not line.startswith(';HEIGHT:'):
+        for i, line in enumerate(self._raw_lines):
+            if line.startswith('M104'):
+                next_line_check = (i + 1 < len(self._raw_lines) and 
+                                 self._raw_lines[i + 1].strip() == 
+                                 '; custom gcode: toolchange_gcode')
+                if next_line_check:
                     continue
             output_lines.append(line)
         self._raw_lines = output_lines
+
+
+
 
 
     def _reconstruct_for_output(self) -> None:
@@ -466,7 +445,7 @@ def main(args) -> None:
         print("No file path provided, exiting now.")
         sys.exit(1)
     
-    processor: ToolchangerPostprocessor = ToolchangerPostprocessor(sys.argv[1])
-    processor.process_gcode()
+    # processor: ToolchangerPostprocessor = ToolchangerPostprocessor(sys.argv[1])
+    # processor.process_gcode()
 
 main(sys.argv)

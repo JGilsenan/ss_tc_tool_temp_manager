@@ -38,18 +38,16 @@ First and foremost, this is not a comprehensive guide to setting up ss for multi
     - filament settings --> multimaterial --> multimaterial toolchange temperature
         - I only mention this to say that it is irrelevant and will be ignored
     - filament settings --> custom g-code --> start g-code
-        - the very first line in this section must be `{current_extruder}`
-            - anything else you may have had in this section is fine, it just has to go after the first line
-            - this is necessary for two reasons:
-                - first, if there was nothing in this section previously, it would not be inserted into the g-code output by ss, and we want it to be inserted
-                - second, since these g-code blocks are inserted for each tool throughout the print, this serves as the identifier of which tool it corresponds to
-            - note: I use the placeholder because then it's the same for every tool, less prone to copy/paste related human error bugs
-    - filament settings --> custom g-code --> end g-code
-        - the very first line in this section must be `{current_extruder}`
-            - anything else you may have had in this section is fine, it just has to go after the first line
-            - this is necessary for two reasons:
-                - first, if there was nothing in this section previously, it would not be inserted into the g-code output by ss, and we want it to be inserted
-                - second, since these g-code blocks are inserted for each tool throughout the print, this serves as the identifier of which tool it corresponds to
+        - Putting anything in this section is optional and not required
+        - If you choose to use this section, you can utilize it to set the following extruder-specific variables for the post process script to use:
+            - NOTE: if you want to set any variables here, then you must set somewhere in this section:
+                - `EXTRUDER={current_extruder}`
+                - this is how the script identifies the extruder that the variables belong to
+            - `WARMUP_TIME`
+                - example: `WARMUP_TIME=90`
+            - `DORMANT_TIME`
+                - example: `DORMANT_TIME=120`
+            - (others to come possibly)
 - Printer settings (other than custom g-code):
     - printer settings --> general --> capabilities --> extruders
         - this must be set to the number of toolheads that you have on your printer
@@ -86,18 +84,12 @@ First and foremost, this is not a comprehensive guide to setting up ss for multi
                 - this script handles that by looking at all of the tools used in the first layer and setting `BED_TEMP` to the highest `first_layer_bed_temperature` of the tools used, there will be similar logic used for setting the bed temperature at the start of the second layer
     - end g-code:
         - this section does not require any modifications, however it is assumed that you use this section to call `PRINT_END` and that your `PRINT_END` macro will perform a routine to turn off tool/bed heaters
-    - before layer change g-code:
-        - the very first line in this section must be `{current_extruder}`
-            - anything else you may have had in this section is fine, it just has to go after the first line
-            - this is necessary because ss will only insert this into the output if there is something in this section, and we want it in the output for this script to find
     - after layer change g-code:
-        - the very first line in this section must be `{current_extruder}`
-            - anything else you may have had in this section is fine, it just has to go after the first line
-            - this is necessary because ss will only insert this into the output if there is something in this section, and we want it in the output for this script to find
         - IMPORTANT NOTE: if you are relying on your slicer to call `VERIFY_TOOL_DETECTED` or `VERIFY_TOOL_DETECTED ASYNC=1` then please ensure that you keep that in this section
     - tool change g-code:
-        - the first line in this section must be `{current_extruder}`
-        - the second line in this section must be `{next_extruder}`
+        - must include the following two lines:
+            - `CURRENT_TOOL={current_extruder}`
+            - `NEXT_TOOL={next_extruder}`
         - there must be nothing else in this section that is related to tool changes, other things are fine, just do not include code to trigger the tool change, that will be inserted by this script
 
 
