@@ -10,6 +10,13 @@ At the time of creating this project ss, while supporting multiple extruder prin
 - to work well with klipper-toolchanger, and for most users at least, to not require significant tearup of their existing printer config files or macros
 
 ## Assumptions, setting expectations, and pre-requisites:
+- it is important to note that if you are generating gcode that uses a single
+    TODO
+    TODO
+    TODO
+    TODO
+    TODO
+    TODO
 - you already have ss setup just how you like it, or at least functionally and you have tested it (this isn't a how-to for ss toolchangers for someone coming from a different slicer)
 - your install and configs for klipper-toolchanger use the following standard macro naming conventions:
     - `PRINT_START` for the start of your print (note: no variables should be passed to your `PRINT_START` for this script to work properly)
@@ -87,6 +94,9 @@ First and foremost, this is not a comprehensive guide to setting up ss for multi
             - `CURRENT_TOOL={current_extruder}`
             - `NEXT_TOOL={next_extruder}`
         - there must be nothing else in this section that is related to tool changes, other things are fine, just do not include code to trigger the tool change, that will be inserted by this script
+
+# Usage
+There's nothing more to do, once ss has referenced the script it will automatically run it each time you generate gcode
 
 # Final Notes:
 - feel free to bug me with questions or requests, response times may vary!

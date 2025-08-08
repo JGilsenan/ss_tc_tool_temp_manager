@@ -884,6 +884,14 @@ class ToolchangerPostprocessor:
         """
         Add the deselect temperature logic.
         """
+        # determine if only one extruder is used in the print
+        ct_used: int = 0
+        for tool in self._tool_configs:
+            if tool.tool_used:
+                ct_used += 1
+        if ct_used == 1:
+            # if only one extruder is used in the print, then we can skip the deselect temperature logic
+            return
         current_section: GcodeSection
         toolchange_sections: list[GcodeSection] = []
         # go through all sections and find the toolchange sections
