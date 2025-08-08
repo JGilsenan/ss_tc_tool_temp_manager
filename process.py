@@ -736,6 +736,7 @@ class ToolchangerPostprocessor:
             new_section_section.toolchange_gcode = True
             new_section_section.score = self._time_toolchange
             new_section_section.tool = first_tool
+            new_section_section.initial_toolchange = True
             self._score_tracker -= new_section_section.score
             # next, replace the lines in the new section
             new_section_section.replace_lines(new_section)
@@ -982,7 +983,7 @@ class ToolchangerPostprocessor:
         # go through all sections and find the toolchange sections
         current_section = self._first_section
         while current_section is not None:
-            if current_section.toolchange_gcode:
+            if current_section.toolchange_gcode and not current_section.initial_toolchange:
                 toolchange_sections.append(current_section)
             current_section = current_section.next_section
         # now for each tool used in the print, excluding the first tool, find the first section it is selected in and mark as heat from off
