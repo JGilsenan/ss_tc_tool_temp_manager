@@ -1,4 +1,4 @@
-## intro:
+## Intro:
 This is a post processing script designed for use with superslicer (ss) and klipper, in particular printers setup to use klipper-toolchanger. (for example my Voron 350 build)
 
 At the time of creating this project ss, while supporting multiple extruder prints, is still a bit lacking in that area, particularly when it comes to tool heating logic. While it is possible to hand craft some fancy custom gcode sections to bridge this gap to an extent, the output is still clunky, and to even get that far requires a depth of knowledge that seems to drive a lot of folks to other slicers with more mature and full featured tool changer support. Now I have tried many other slicers for just that reason, however I was left feeling as though I was sacrificing print quality for easier toolchanger setup, and that was my main motivation in developing this script. 
