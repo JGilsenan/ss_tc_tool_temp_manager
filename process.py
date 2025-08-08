@@ -754,17 +754,6 @@ class ToolchangerPostprocessor:
             new_section_section = self._insert_section_after_section(current_section.prev_section, new_section[0])
             new_section_section.replace_lines(new_section)
 
-
-        # # ------------------------------------------------------------
-        # # first tool change gcode
-        # # ------------------------------------------------------------
-        # # find the first toolchange_gcode section and remove it
-        # current_section = self._first_section
-        # while not current_section.toolchange_gcode:
-        #     current_section = current_section.next_section
-        # # delete the section
-        # self._delete_section(current_section)
-
     def _process_second_layer_changes(self) -> None:
         """
         Process the second layer changes.
@@ -949,6 +938,9 @@ class ToolchangerPostprocessor:
                         break
                 score_tracker += current_section.score
                 current_section = current_section.next_section
+            if current_section is None:
+                # we have reached the end of the print
+                break
             # now we can use the score to determine whether to reduce the temperature or turn the heater off
             if score_tracker >= self._tool_configs[outgoing_tool].dormant_time_s:
                 # mark the next toolchange section as heat from off
