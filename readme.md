@@ -1,8 +1,3 @@
-# superslicer_toolchanger post processing script
-
-NOTE: this is a work in progress, if you stumble across this, please understand
-that.
-
 ## intro:
 This is a post processing script designed for use with superslicer (ss) and klipper, in particular printers setup to use klipper-toolchanger. (for example my Voron 350 build)
 
@@ -18,7 +13,7 @@ At the time of creating this project ss, while supporting multiple extruder prin
 - you already have ss setup just how you like it, or at least functionally and you have tested it (this isn't a how-to for ss toolchangers for someone coming from a different slicer)
 - your install and configs for klipper-toolchanger use the following standard macro naming conventions:
     - `PRINT_START` for the start of your print
-        - in addition to any other variables you may currently be passing to `PRINT_START`, it is assumed (for now, remapping support may be added later) that your `PRINT_START` accepts the following temperature parameters: 
+        - in addition to any other variables you may currently be passing to `PRINT_START`, it is assumed that your `PRINT_START` accepts the following temperature parameters: 
             - `TOOL_TEMP`
             - `BED_TEMP`
     - PRINT_END for the end of your print
@@ -45,9 +40,10 @@ First and foremost, this is not a comprehensive guide to setting up ss for multi
                 - this is how the script identifies the extruder that the variables belong to
             - `WARMUP_TIME`
                 - example: `WARMUP_TIME=90`
+            - `WARMUP_FROM_OFF_TIME`
+                - example: `WARMUP_FROM_OFF_TIME=110`
             - `DORMANT_TIME`
                 - example: `DORMANT_TIME=120`
-            - (others to come possibly)
 - Printer settings (other than custom g-code):
     - printer settings --> general --> capabilities --> extruders
         - this must be set to the number of toolheads that you have on your printer
@@ -58,27 +54,17 @@ First and foremost, this is not a comprehensive guide to setting up ss for multi
 - Printer settings --> custom g-code
     - start g-code:
         - IMPORTANT NOTE: this section is the trickiest to setup, please pay attention to all of these instructions
+        - TLDR: this should just have the call to `PRINT_START`, all else is handled by this script
+            - this script will ignore anything else in this section and replace it with `PRINT_START`
+            - your `PRINT_START` macro should not set any temperatures
         - pre-requisite conditions/modifications to your `PRINT_START` macro:
-            - NOTE: I will be adding a sample/template `PRINT_START` macro
-            - if not present, ensure that your `PRINT_START` macro accepts `TOOL_TEMP` and `BED_TEMP` parameters for setting tool and bed temperatures
             - if present, edit your `PRINT_START` macro to remove any preheating logic that may exist there, the goal is to consolidate nearly all temperature setting logic within the gcode
-                - The one exception to this is the setting of tool temperature to to `TOOL_TEMP` performed by your `PRINT_START` macro
             - if present, remove any logic from your `PRINT_START` macro that heats the tool and/or bed for homing, QGL, bed mesh, etc, this will be handled by and added by this script
-        - it is assumed that your start g-code section currently contains only a call to `PRINT_START` followed by some variables that are required by your macro
+            - if present, remove any logic from your `PRINT_START` macro that selects the tool
         - you may be used to seeing instructions telling you that this needs to be written on a single line ex: `PRINT_START TOOL_TEMP=123 BED=456...` and so forth, and this largely remains true, however you should do the following:
             - remove `TOOL_TEMP` parameter:
                 - the reason for this is that since ss currently lacks `is_extruder_used` or other placeholders/variables that can be used to intelligently set tool temperatures you may be forced to configure ss such that you have an unnecessary added step of heating T0 to its `first_layer_temperature`
-                - this script handles this by identifying whether or not T0 is the first tool used, whether it is used in the first layer, whether it is used in the near future, and:
-                    - if it is the first tool used:
-                        - `TOOL_TEMP` and `BED_TEMP` will be appended to the call to `PRINT_START` as normally expected
-                    - if it is not the first tool used:
-                        - if it is used in the near future, including the first layer:
-                            - `TOOL_TEMP` will be set to `first_layer_temperature` - `ooze prevention temperature`
-                        - if it is used in the near future, but not the first layer:
-                            - `TOOL_TEMP` will be set to `other layer temperature` - `ooze prevention temperature`
-                        - if it is not used in the print:
-                            - `TOOL_TEMP` will be set to zero
-                            - NOTE: if you do not already have this, the portion of your `PRINT_START` macro that sets final tool temperature should be converted to if-else logic such that if the temperature is set to zero the command will be `M104` (set and don't wait) instead of the typical `M109` (set and wait), otherwise the resulting behavior will be that you have to wait for T0 to cool to zero, which likely will never happen, even in an open chamber
+                - this script handles this temperature control
             - remove `BED_TEMP` parameter:
                 - the reason for this is similar to the reason for removing `TOOL_TEMP`, ss just doesn't have a great way currently of intelligently setting this value
                 - this script handles that by looking at all of the tools used in the first layer and setting `BED_TEMP` to the highest `first_layer_bed_temperature` of the tools used, there will be similar logic used for setting the bed temperature at the start of the second layer
