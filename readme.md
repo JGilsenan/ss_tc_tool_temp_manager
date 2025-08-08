@@ -1,4 +1,4 @@
-## Intro:
+# Intro:
 This is a post processing script designed for use with superslicer (ss) and klipper, in particular printers setup to use klipper-toolchanger. (for example my Voron 350 build)
 
 At the time of creating this project ss, while supporting multiple extruder prints, is still a bit lacking in that area, particularly when it comes to tool heating logic. While it is possible to hand craft some fancy custom gcode sections to bridge this gap to an extent, the output is still clunky, and to even get that far requires a depth of knowledge that seems to drive a lot of folks to other slicers with more mature and full featured tool changer support. Now I have tried many other slicers for just that reason, however I was left feeling as though I was sacrificing print quality for easier toolchanger setup, and that was my main motivation in developing this script. 
@@ -47,7 +47,7 @@ First and foremost, this is not a comprehensive guide to setting up ss for multi
                 - this designates the amount of time (approximated by this script) that this extruder needs to be not in use in order for it to be turned off completely in between uses (note: if it is turned off due to inactivity, the `WARMUP_FROM_OFF_TIME` is used for preheating it prior to its next use instead of `WARMUP_TIME`)
                 - example: `DORMANT_TIME=120`
                 - this defaults to `120` if not provided
-            - my current section: 
+            - example of a complete section for a given extruder: 
                 ```
                 EXTRUDER={current_extruder}
                 WARMUP_TIME=30
