@@ -655,18 +655,10 @@ class ToolchangerPostprocessor:
         # ------------------------------------------------------------
         # start gcode
         # ------------------------------------------------------------
-        # next, create a simple start gcode section
-        simple_start_gcode: list[str] = []
-        simple_start_gcode.append(f'; custom gcode: start_gcode\n')
-        simple_start_gcode.append(f'PRINT_START ; call print_start\n')
-        simple_start_gcode.append(f'; custom gcode end: start_gcode\n')
-        simple_start_gcode.append('\n')
         # now find the existing start gcode section
         current_section = self._first_section
         while not current_section.start_gcode:
             current_section = current_section.next_section
-        # replace the lines in the start gcode section
-        current_section.replace_lines(simple_start_gcode)
         # score the section
         current_section.score = self._time_start_gcode
         # get the first tool from the start gcode section
