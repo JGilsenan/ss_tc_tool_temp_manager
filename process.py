@@ -972,7 +972,6 @@ class ToolchangerPostprocessor:
             # now we traverse the sections backwards
             current_section = toolchange_section
             score_tracker: float = 0.0
-            print(toolchange_section.resolve_lines())
             while True:
                 # add the score of the previous section to the tracker
                 score_tracker += current_section.prev_section.score
