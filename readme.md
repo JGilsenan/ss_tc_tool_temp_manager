@@ -41,6 +41,13 @@ First and foremost, this is not a comprehensive guide to setting up ss for multi
                 - example: `WARMUP_FROM_OFF_TIME=110`
             - `DORMANT_TIME`
                 - example: `DORMANT_TIME=120`
+            - my current section: 
+            ```
+            EXTRUDER={current_extruder}
+            WARMUP_TIME=90
+            WARMUP_FROM_OFF_TIME=110
+            DORMANT_TIME=120
+            ```
 - Printer settings (other than custom g-code):
     - printer settings --> general --> capabilities --> extruders
         - this must be set to the number of toolheads that you have on your printer
