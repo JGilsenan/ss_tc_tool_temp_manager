@@ -36,18 +36,24 @@ First and foremost, this is not a comprehensive guide to setting up ss for multi
                 - `EXTRUDER={current_extruder}`
                 - this is how the script identifies the extruder that the variables belong to
             - `WARMUP_TIME`
-                - example: `WARMUP_TIME=90`
+                - this designates how much time this extruder should be given to warm up before it is needed, if it is starting at the idle temperature (tool temperature if used now - ooze prevention offset) and transitioning to the temp it will be used at
+                - example: `WARMUP_TIME=30`
+                - this defaults to `30` if not provided
             - `WARMUP_FROM_OFF_TIME`
+                - this designates how much time this extruder should be given to warm up to use temperature if it is off currently
                 - example: `WARMUP_FROM_OFF_TIME=110`
+                - this defaults to `90` if not provided
             - `DORMANT_TIME`
+                - this designates the amount of time (approximated by this script) that this extruder needs to be not in use in order for it to be turned off completely in between uses (note: if it is turned off due to inactivity, the `WARMUP_FROM_OFF_TIME` is used for preheating it prior to its next use instead of `WARMUP_TIME`)
                 - example: `DORMANT_TIME=120`
+                - this defaults to `120` if not provided
             - my current section: 
-            ```
-            EXTRUDER={current_extruder}
-            WARMUP_TIME=90
-            WARMUP_FROM_OFF_TIME=110
-            DORMANT_TIME=120
-            ```
+                ```
+                EXTRUDER={current_extruder}
+                WARMUP_TIME=30
+                WARMUP_FROM_OFF_TIME=110
+                DORMANT_TIME=120
+                ```
 - Printer settings (other than custom g-code):
     - printer settings --> general --> capabilities --> extruders
         - this must be set to the number of toolheads that you have on your printer
