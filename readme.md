@@ -10,13 +10,10 @@ At the time of creating this project ss, while supporting multiple extruder prin
 - to work well with klipper-toolchanger, and for most users at least, to not require significant tearup of their existing printer config files or macros
 
 ## Assumptions, setting expectations, and pre-requisites:
-- it is important to note that if you are generating gcode that uses a single
-    TODO
-    TODO
-    TODO
-    TODO
-    TODO
-    TODO
+- it is important to note that if you are generating gcode that uses a single tool and:
+    - it is T0: there will be no modifications to the output gcode
+    - it is not T0: there will be modifications to the output gcode, forcing T0 for `PRINT_START`
+- likewise, even if T0 is not used in a print, it will be selected and used for `PRINT_START`
 - you already have ss setup just how you like it, or at least functionally and you have tested it (this isn't a how-to for ss toolchangers for someone coming from a different slicer)
 - your install and configs for klipper-toolchanger use the following standard macro naming conventions:
     - `PRINT_START` for the start of your print (note: no variables should be passed to your `PRINT_START` for this script to work properly)

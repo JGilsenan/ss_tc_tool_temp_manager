@@ -683,6 +683,16 @@ class ToolchangerPostprocessor:
         self._delete_section(current_section)
 
         # ------------------------------------------------------------
+        # first tool change gcode
+        # ------------------------------------------------------------
+        # find the first toolchange_gcode section and remove it
+        current_section = self._first_section
+        while not current_section.toolchange_gcode:
+            current_section = current_section.next_section
+        # delete the section
+        self._delete_section(current_section)
+
+        # ------------------------------------------------------------
         # toolchange gcode or temperature block
         # ------------------------------------------------------------
         # first find the existing start gcode section
@@ -691,6 +701,7 @@ class ToolchangerPostprocessor:
             current_section = current_section.next_section
         new_section = []
         if first_tool == 0:
+            print('T0 is the first tool')
             # T0 is the first tool, so we need to set the temperature
             # add line for marking the section
             new_section.append(f'; custom gcode: first_tool_temperature\n')
@@ -702,13 +713,19 @@ class ToolchangerPostprocessor:
             # now create a section to contain this and insert it at the start of the linked list
             new_section_section = self._insert_section_after_section(current_section, new_section[0])
             new_section_section.toolchange_gcode = False
+            new_section_section.tool = 0
             # next, replace the lines in the new section
             new_section_section.replace_lines(new_section)
         else:
+            # determine if T0 is used in the print
+            t0_used: bool = self._tool_configs[0].tool_used
             # T0 is not the first tool, so we need to select the first tool
             self._has_first_toolchange = True
             # add line for marking the section
             new_section.append(f'; custom gcode: first_tool_selection\n')
+            # if T0 is not used in print, then turn it off
+            if not t0_used:
+                new_section.append(f'M104 S0 T0 ; turn off T0 as it is not used in print\n')
             # add line for selecting the first tool
             new_section.append(f'T{first_tool} ; select tool {first_tool}\n')
             # add line for marking the section
@@ -718,19 +735,35 @@ class ToolchangerPostprocessor:
             new_section_section = self._insert_section_after_section(current_section, new_section[0])
             new_section_section.toolchange_gcode = True
             new_section_section.score = self._time_toolchange
+            new_section_section.tool = first_tool
             self._score_tracker -= new_section_section.score
             # next, replace the lines in the new section
             new_section_section.replace_lines(new_section)
 
-        # ------------------------------------------------------------
-        # first tool change gcode
-        # ------------------------------------------------------------
-        # find the first toolchange_gcode section
-        current_section = self._first_section
-        while not current_section.toolchange_gcode:
-            current_section = current_section.next_section
-        # delete the section
-        self._delete_section(current_section)
+            # next, let's add a preheat section for this tool
+            new_section = []
+            new_section.append('\n')
+            new_section.append(f'; custom gcode: preheat_section T{first_tool}\n')
+            new_section.append(f'M104 S{self._tool_configs[first_tool].first_layer_temperature} T{first_tool} ; set tool temperature to preheat\n')
+            new_section.append(f'; custom gcode end: preheat_section T{first_tool}\n')
+            new_section.append('\n')
+            # find the existing start gcode section
+            current_section = self._first_section
+            while not current_section.start_gcode:
+                current_section = current_section.next_section
+            new_section_section = self._insert_section_after_section(current_section.prev_section, new_section[0])
+            new_section_section.replace_lines(new_section)
+
+
+        # # ------------------------------------------------------------
+        # # first tool change gcode
+        # # ------------------------------------------------------------
+        # # find the first toolchange_gcode section and remove it
+        # current_section = self._first_section
+        # while not current_section.toolchange_gcode:
+        #     current_section = current_section.next_section
+        # # delete the section
+        # self._delete_section(current_section)
 
     def _process_second_layer_changes(self) -> None:
         """
@@ -942,6 +975,16 @@ class ToolchangerPostprocessor:
         """
         Add the preheat logic.
         """
+
+        # determine if only one extruder is used in the print
+        ct_used: int = 0
+        for tool in self._tool_configs:
+            if tool.tool_used:
+                ct_used += 1
+        if ct_used == 1:
+            # if only one extruder is used in the print, then we can skip the preheat logic
+            return
+
         current_section: GcodeSection
         toolchange_sections: list[GcodeSection] = []
         # go through all sections and find the toolchange sections
