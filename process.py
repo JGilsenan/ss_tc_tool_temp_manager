@@ -876,10 +876,9 @@ class ToolchangerPostprocessor:
                 # determine if we need to add a clean nozzle command
                 if self._tool_configs[current_section.incoming_tool].clean_nozzle_on_toolchange:
                     new_section.append(f'CLEAN_NOZZLE ; clean nozzle\n')
-                elif current_section.heat_from_off and self._tool_configs[current_section.incoming_tool].clean_nozzle_on_first_use:
-                    new_section.append(f'CLEAN_NOZZLE ; clean nozzle\n')
                 elif first_use and not self._first_section.tool == current_section.incoming_tool and self._tool_configs[current_section.incoming_tool].clean_nozzle_on_first_use:
                     new_section.append(f'CLEAN_NOZZLE ; clean nozzle\n')
+                # NOTE: clean nozzle logic for tools heated from off is handled in the deselect temperature logic function below
                 # append the last line from the original section
                 new_section.append(lines[-1])
                 new_section.append('\n')
@@ -985,6 +984,11 @@ class ToolchangerPostprocessor:
             if score_tracker >= self._tool_configs[outgoing_tool].dormant_time_s:
                 # mark the next toolchange section as heat from off
                 current_section.heat_from_off = True
+                # if the tool is marked to clean the nozzle on first use, then we need to add a clean nozzle command
+                if self._tool_configs[outgoing_tool].clean_nozzle_on_first_use:
+                    lines = current_section.resolve_lines()
+                    lines.insert(-2, f'CLEAN_NOZZLE ; clean nozzle\n')
+                    current_section.replace_lines(lines)
                 # now add a temperature command to turn the heater off
                 lines = toolchange_section.resolve_lines()
                 lines.insert(-2, f'M104 S0 T{outgoing_tool} ; turn off tool heater for now as it will not be used again soon\n')
