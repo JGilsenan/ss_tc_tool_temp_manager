@@ -7,6 +7,8 @@ from typing import Any
 CFG_DEFAULT_TIME_BEFORE_PREHEAT_S: int = 30
 CFG_DEFAULT_TIME_BEFORE_PREHEAT_FROM_OFF_S: int = 90
 CFG_DEFAULT_OFF_TIME_TO_GO_DORMANT_S: int = 120
+CFG_DEFAULT_CLEAN_ON_FIRST_USE: bool = True
+CFG_DEFAULT_CLEAN_ON_EVERY_TOOLCHANGE: bool = False
 
 class GcodeSection:
     _lines: list[str]
@@ -86,6 +88,8 @@ class ToolConfig:
     warmup_time_s: int
     warmup_from_off_time_s: int
     dormant_time_s: int
+    clean_nozzle_on_first_use: bool
+    clean_nozzle_on_toolchange: bool
 
     def __init__(self, index: int) -> None:
         self.tool_number = index
@@ -98,6 +102,8 @@ class ToolConfig:
         self.warmup_time_s = 0
         self.dormant_time_s = 0
         self.warmup_from_off_time_s = 0
+        self.clean_nozzle_on_first_use = False
+        self.clean_nozzle_on_toolchange = False
 
 
 class ToolchangerPostprocessor:
@@ -464,6 +470,8 @@ class ToolchangerPostprocessor:
                 warmup_time_s: int = -1
                 dormant_time_s: int = -1
                 warmup_from_off_time_s: int = -1
+                clean_nozzle_on_first_use: bool = CFG_DEFAULT_CLEAN_ON_FIRST_USE
+                clean_nozzle_on_toolchange: bool = CFG_DEFAULT_CLEAN_ON_EVERY_TOOLCHANGE
                 for j in range(open_line, close_line):
                     if self._raw_lines[j].startswith('EXTRUDER='):
                         extruder_number = int(self._raw_lines[j].split('=')[1].strip())
@@ -476,6 +484,12 @@ class ToolchangerPostprocessor:
                         delete_lines.append(j)
                     elif self._raw_lines[j].startswith('DORMANT_TIME='):
                         dormant_time_s = int(self._raw_lines[j].split('=')[1].strip())
+                        delete_lines.append(j)
+                    elif self._raw_lines[j].startswith('CLEAN_ON_FIRST_USE='):
+                        clean_nozzle_on_first_use = self._raw_lines[j].split('=')[1].strip() == 'True'
+                        delete_lines.append(j)
+                    elif self._raw_lines[j].startswith('CLEAN_ON_EVERY_TOOLCHANGE='):
+                        clean_nozzle_on_toolchange = self._raw_lines[j].split('=')[1].strip() == 'True'
                         delete_lines.append(j)
                 if extruder_number == -1 and warmup_time_s == -1 and dormant_time_s == -1 and warmup_from_off_time_s == -1:
                     # no params in this block, so just move on
@@ -493,6 +507,10 @@ class ToolchangerPostprocessor:
                     self._tool_configs[extruder_number].dormant_time_s = dormant_time_s
                 else:
                     self._tool_configs[extruder_number].dormant_time_s = CFG_DEFAULT_OFF_TIME_TO_GO_DORMANT_S
+                if clean_nozzle_on_toolchange:
+                    clean_nozzle_on_first_use = True
+                self._tool_configs[extruder_number].clean_nozzle_on_first_use = clean_nozzle_on_first_use
+                self._tool_configs[extruder_number].clean_nozzle_on_toolchange = clean_nozzle_on_toolchange
                 # now sort the delete lines descending
                 delete_lines.sort(reverse=True)
                 # now delete the lines
@@ -636,12 +654,16 @@ class ToolchangerPostprocessor:
         new_section.append(f'; custom gcode: pre_start_gcode\n')
         # add line for selecting T0
         new_section.append(f'T0 ; select T0\n')
+        # add line for verifying tool detected
+        new_section.append(f'VERIFY_TOOL_DETECTED ASYNC=1 ; verify tool detected\n')
         # add line for setting bed temperature (without wait)
         new_section.append(f'M140 S{max_first_layer_bed_temp} ; set bed temperature\n')
         # add line for setting T0 temperature (with wait)
         new_section.append(f'M109 S150 T0 ; set T0 temperature and wait\n')
         # add line for setting bed temperature (with wait)
         new_section.append(f'M190 S{max_first_layer_bed_temp} ; set bed temperature and wait\n')
+        # add line for cleaning nozzle
+        new_section.append(f'CLEAN_NOZZLE ; clean nozzle\n')
         # add line for marking the section
         new_section.append(f'; custom gcode end: pre_start_gcode\n')
         new_section.append('\n')
@@ -663,11 +685,18 @@ class ToolchangerPostprocessor:
         current_section.score = self._time_start_gcode
         # get the first tool from the start gcode section
         first_tool = current_section.tool
+        # now replace the lines in the start gcode section with a simple PRINT_START call
+        new_section = []
+        new_section.append(f'; custom gcode: start_gcode\n')
+        new_section.append(f'PRINT_START\n')
+        new_section.append(f'; custom gcode end: start_gcode\n')
+        new_section.append('\n')
+        current_section.replace_lines(new_section)
 
         # ------------------------------------------------------------
         # start temperature block
         # ------------------------------------------------------------
-        # first, find the existing start temperature block
+        # first, find the existing start temperature block and delete it
         current_section = self._first_section
         while not current_section.initial_temperature_block:
             current_section = current_section.next_section
@@ -677,7 +706,7 @@ class ToolchangerPostprocessor:
         # ------------------------------------------------------------
         # first tool change gcode
         # ------------------------------------------------------------
-        # find the first toolchange_gcode section and remove it
+        # find the first toolchange_gcode section and delete it
         current_section = self._first_section
         while not current_section.toolchange_gcode:
             current_section = current_section.next_section
@@ -693,12 +722,13 @@ class ToolchangerPostprocessor:
             current_section = current_section.next_section
         new_section = []
         if first_tool == 0:
-            print('T0 is the first tool')
             # T0 is the first tool, so we need to set the temperature
             # add line for marking the section
             new_section.append(f'; custom gcode: first_tool_temperature\n')
             # add line for setting T0 temperature (with wait)
             new_section.append(f'M109 S{self._tool_configs[0].first_layer_temperature} T0 ; set T0 temperature and wait\n')
+            # add line for cleaning nozzle
+            new_section.append(f'CLEAN_NOZZLE ; clean nozzle\n')
             # add line for marking the section
             new_section.append(f'; custom gcode end: first_tool_temperature\n')
             new_section.append('\n')
@@ -720,6 +750,10 @@ class ToolchangerPostprocessor:
                 new_section.append(f'M104 S0 T0 ; turn off T0 as it is not used in print\n')
             # add line for selecting the first tool
             new_section.append(f'T{first_tool} ; select tool {first_tool}\n')
+            # add verify tool detected command
+            new_section.append(f'VERIFY_TOOL_DETECTED ASYNC=1 ; verify tool detected\n')
+            # add line for cleaning nozzle
+            new_section.append(f'CLEAN_NOZZLE ; clean nozzle\n')
             # add line for marking the section
             new_section.append(f'; custom gcode end: first_tool_selection\n')
             new_section.append('\n')
@@ -732,7 +766,6 @@ class ToolchangerPostprocessor:
             self._score_tracker -= new_section_section.score
             # next, replace the lines in the new section
             new_section_section.replace_lines(new_section)
-
             # next, let's add a preheat section for this tool
             new_section = []
             new_section.append('\n')
@@ -797,17 +830,24 @@ class ToolchangerPostprocessor:
         Process the toolchange sections.
         """
         current_section: GcodeSection
+        tools_encountered: set[int] = set()
         # go through all sections and find the toolchange sections
         current_section = self._first_section
         skipped_first_toolchange: bool = False
         if not self._has_first_toolchange:
-            skipped_first_toolchange = True
+            skipped_first_toolchange = True  # otherwise the first toolchange will be skipped, so we need to mark it as skipped to prevent it from being skipped
         while current_section is not None:
             if current_section.toolchange_gcode and not skipped_first_toolchange:
                 skipped_first_toolchange = True
                 current_section = current_section.next_section
                 continue
+            first_use: bool = False
             if current_section.toolchange_gcode:
+                if current_section.tool not in tools_encountered:
+                    tools_encountered.add(current_section.tool)
+                    first_use = True
+                else:
+                    first_use = False
                 lines = current_section.resolve_lines()
                 # find the outgoing and incoming tool
                 for line in lines:
@@ -833,6 +873,13 @@ class ToolchangerPostprocessor:
                 new_section.append(f'T{current_section.incoming_tool} ; select tool {current_section.incoming_tool}\n')
                 # append a verify tool detected command
                 new_section.append(f'VERIFY_TOOL_DETECTED ASYNC=1 ; verify tool detected\n')
+                # determine if we need to add a clean nozzle command
+                if self._tool_configs[current_section.incoming_tool].clean_nozzle_on_toolchange:
+                    new_section.append(f'CLEAN_NOZZLE ; clean nozzle\n')
+                elif current_section.heat_from_off and self._tool_configs[current_section.incoming_tool].clean_nozzle_on_first_use:
+                    new_section.append(f'CLEAN_NOZZLE ; clean nozzle\n')
+                elif first_use and not self._first_section.tool == current_section.incoming_tool and self._tool_configs[current_section.incoming_tool].clean_nozzle_on_first_use:
+                    new_section.append(f'CLEAN_NOZZLE ; clean nozzle\n')
                 # append the last line from the original section
                 new_section.append(lines[-1])
                 new_section.append('\n')
@@ -1009,10 +1056,8 @@ class ToolchangerPostprocessor:
             current_section = toolchange_section
             score_tracker: float = 0.0
             while True:
-                # add the score of the previous section to the tracker
-                score_tracker += current_section.prev_section.score
                 # check if there is a previous section
-                if current_section.prev_section is None or current_section.prev_section == self._first_section:
+                if current_section.prev_section == self._first_section:
                     # we have reached the start of the print
                     # first find the start_print section
                     search_section: GcodeSection = self._first_section
@@ -1029,7 +1074,13 @@ class ToolchangerPostprocessor:
                     preheat_section.add_line(f'; custom gcode end: preheat_section T{current_tool}\n')
                     preheat_section.add_line('\n')
                     break
-                # check if the previous section is a toolchange section
+                # check if the previous section has this tool selected or is a toolchange section selecting this tool
+                if current_section.prev_section.tool == current_tool or (current_section.prev_section.toolchange_gcode and current_section.prev_section.incoming_tool == current_tool):
+                    # no point in preheating a tool that is actively being selected or is printing
+                    break
+                # add the score of the previous section to the tracker
+                score_tracker += current_section.prev_section.score
+                # check if the score has been reached
                 if score_tracker >= preheat_time_s:
                     # insert the preheat section before the previous section
                     preheat_section = self._insert_section_after_section(current_section.prev_section.prev_section, '\n')
@@ -1071,6 +1122,8 @@ class ToolchangerPostprocessor:
         with open(self._input_file_path, "w") as writefile:
             for line in self._output_lines:
                 writefile.write(line)
+
+    # section insertion functions
 
     def _insert_new_section_at_end(self, line: str) -> GcodeSection:
         """

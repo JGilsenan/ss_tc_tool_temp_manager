@@ -1,3 +1,30 @@
+# TO DO:
+# TO DO:
+# TO DO:
+# TO DO:
+# TO DO:
+# TO DO:
+- line 687
+    - when you start with T0 make sure and add a 'clean nozzle' step after it has been fully heated
+    - when you start with another tool, add a 'clean nozzle' step in the first tool selection after the tool has been selected
+- process:
+    - make a clean nozzle call the first time a tool is used
+- external:
+    - create a refined clean nozzle macro that can be safely run even if printing already started by noting current position, moving above the brush, dropping onto the brush, cleaning the nozzle, then raising up above the print line, then going to current pos previously noted
+
+
+
+# TO DO:
+# TO DO:
+# TO DO:
+# TO DO:
+# TO DO:
+# TO DO:
+- add param to toolchange gcode section that users can set for clean nozzle upon toolchange
+
+
+
+
 # Intro:
 This is a post processing script designed for use with superslicer (ss) and klipper, in particular printers setup to use klipper-toolchanger. (for example my Voron 350 build)
 
@@ -19,6 +46,7 @@ At the time of creating this project ss, while supporting multiple extruder prin
     - `PRINT_START` for the start of your print (note: no variables should be passed to your `PRINT_START` for this script to work properly)
     - PRINT_END for the end of your print
     - T[Tool number] for performing a tool change
+    - `CLEAN_NOZZLE` for a nozzle cleaning routine
 - you have configured your toolchanger such that ALL homing, bed mesh, QGL, etc MUST be performed using T0, regardless of whether or not T0 is used in a given print
 - you are okay with preheating the bed to `first_layer_bed_temperature` and T0 to 150C prior to any homing, QGL, bed mesh, etc routines performed in your `PRINT_START` macro, this script adds this behavior.
 
@@ -26,13 +54,14 @@ At the time of creating this project ss, while supporting multiple extruder prin
 
 First and foremost, this is not a comprehensive guide to setting up ss for multiple extruders, at least not for now, but it is pretty close, and assuming that you managed to locate the docs for prusa slicer and have set up your configs for basic multi extruder usage this will get you the rest of the way. With that in mind, slicer configuration is only half of the battle, your printer must also be configured properly, I will at some point share my toolchanger configurations that pair with this ss configuration set. The following is a non-exhaustive list of settings that need to be accounted for strictly for the purpose of this script performing as designed:
 -  print settings --> multiple extruders --> ooze prevention
-    - this needs to be enabled and a value set, even if it is zero
+    - whether or not you want this to be enabled (knowing that it adds a part-height skirt), a temperature should be set for this, as it will be used in the preheating of tools
+    - if you choose not to enable ooze prevention, temporarily enable it to set the temperature then disable it again, the value you enter will still be output if you do this
 -  print settings --> output options --> post-processing script
     - this is where you will reference the post processing script, it is simply the absolute filepath to where you store the script on your computer
 - Filament settings:
     - overall: you need to have a configuration for each of your toolheads and any instructions here need to be performed for every toolhead
     - filament settings --> multimaterial --> multimaterial toolchange temperature
-        - I only mention this to say that it is irrelevant and will be ignored
+        - I only mention this to say that it is irrelevant and will be ignored, even though it sounds like something you will need
     - filament settings --> custom g-code --> start g-code
         - Putting anything in this section is optional and not required
         - If you choose to use this section, you can utilize it to set the following extruder-specific variables for the post process script to use:
@@ -51,12 +80,24 @@ First and foremost, this is not a comprehensive guide to setting up ss for multi
                 - this designates the amount of time (approximated by this script) that this extruder needs to be not in use in order for it to be turned off completely in between uses (note: if it is turned off due to inactivity, the `WARMUP_FROM_OFF_TIME` is used for preheating it prior to its next use instead of `WARMUP_TIME`)
                 - example: `DORMANT_TIME=120`
                 - this defaults to `120` if not provided
+            - `CLEAN_ON_FIRST_USE`
+                - if set to `True`, then a call to the `CLEAN_NOZZLE` macro will be issued before using the tool for the first time in a print
+                - this defaults to `True`
+                - note that if `CLEAN_ON_EVERY_TOOLCHANGE` is set to True then `CLEAN_ON_FIRST_USE` is overridden
+                - WARNING: you are responsible for ensuring that your `CLEAN_NOZZLE` macro is safe to run at any point during a print if this setting is set to `True`, simple nozzle cleaning macros that do not take measures to stay out of the print area can lead to collisions if this is enabled.
+            - `CLEAN_ON_EVERY_TOOLCHANGE`
+                - if set to `True`, then a call to the `CLEAN_NOZZLE` macro will be issued before using the tool each time it is selected
+                - not that setting this to `True` overrides `CLEAN_ON_FIRST_USE` to be set to `True` as well
+                - this defaults to `False`
+                - WARNING: you are responsible for ensuring that your `CLEAN_NOZZLE` macro is safe to run at any point during a print if this setting is set to `True`, simple nozzle cleaning macros that do not take measures to stay out of the print area can lead to collisions if this is enabled.
             - example of a complete section for a given extruder: 
                 ```
                 EXTRUDER={current_extruder}
                 WARMUP_TIME=30
                 WARMUP_FROM_OFF_TIME=110
                 DORMANT_TIME=120
+                CLEAN_ON_FIRST_USE=True
+                CLEAN_ON_EVERY_TOOLCHANGE=True
                 ```
 - Printer settings (other than custom g-code):
     - printer settings --> general --> capabilities --> extruders
@@ -71,21 +112,16 @@ First and foremost, this is not a comprehensive guide to setting up ss for multi
         - TLDR: this should just have the call to `PRINT_START`, all else is handled by this script
             - this script will ignore anything else in this section and replace it with `PRINT_START`
             - your `PRINT_START` macro should not set any temperatures
-        - pre-requisite conditions/modifications to your `PRINT_START` macro:
-            - if present, edit your `PRINT_START` macro to remove any preheating logic that may exist there, the goal is to consolidate nearly all temperature setting logic within the gcode
-            - if present, remove any logic from your `PRINT_START` macro that heats the tool and/or bed for homing, QGL, bed mesh, etc, this will be handled by and added by this script
-            - if present, remove any logic from your `PRINT_START` macro that selects the tool
-        - you may be used to seeing instructions telling you that this needs to be written on a single line ex: `PRINT_START TOOL_TEMP=123 BED=456...` and so forth, and this largely remains true, however you should do the following:
-            - remove `TOOL_TEMP` parameter:
-                - the reason for this is that since ss currently lacks `is_extruder_used` or other placeholders/variables that can be used to intelligently set tool temperatures you may be forced to configure ss such that you have an unnecessary added step of heating T0 to its `first_layer_temperature`
-                - this script handles this temperature control
-            - remove `BED_TEMP` parameter:
-                - the reason for this is similar to the reason for removing `TOOL_TEMP`, ss just doesn't have a great way currently of intelligently setting this value
-                - this script handles that by looking at all of the tools used in the first layer and setting `BED_TEMP` to the highest `first_layer_bed_temperature` of the tools used, there will be similar logic used for setting the bed temperature at the start of the second layer
+        - pre-requisite conditions/modifications to your `PRINT_START` macro, if present, remove the following:
+            - any tool preheating logic that may exist there, the goal is to consolidate all temperature setting logic within the gcode
+            - any logic that heats the tool and/or bed for homing, QGL, bed mesh, etc, this will be handled by and added by this script
+            - any logic that selects the tool
+        - Which `PRINT_START` macro:
+            - I will upload a `PRINT_START` macro template that pairs with this post-process script
+            - NOTE: you will be responsible for modifying the provided `PRINT_START` macro to match your current printer setup, as it will be minimal
+            - NOTE: please look at the 'pre-requisite conditions/modifications' section above first
     - end g-code:
-        - this section does not require any modifications, however it is assumed that you use this section to call `PRINT_END` and that your `PRINT_END` macro will perform a routine to turn off tool/bed heaters
-    - after layer change g-code:
-        - IMPORTANT NOTE: if you are relying on your slicer to call `VERIFY_TOOL_DETECTED` or `VERIFY_TOOL_DETECTED ASYNC=1` then please ensure that you keep that in this section
+        - this section does not require any modifications, however it is assumed that you use this section to call `PRINT_END` and that your `PRINT_END` macro will perform a routine to turn off tool/bed heaters and move the toolhead
     - tool change g-code:
         - must include the following two lines:
             - `CURRENT_TOOL={current_extruder}`
@@ -94,6 +130,30 @@ First and foremost, this is not a comprehensive guide to setting up ss for multi
 
 # Usage
 There's nothing more to do, once ss has referenced the script it will automatically run it each time you generate gcode
+
+# What it does
+- eliminates ss's temperature setting logic that cannot be controlled via settings:
+    - the post toolchange/post start filament temperature setting logic that ss uses inserts a set temperature and wait command that can cause long waiting periods in between tool changes while awaiting tool temperature stabilization
+        - this logic is removed from the gcode output
+        - this logic is replaced by the preheat logic paired with a plain set temperature command for the tool
+        - but won't this introduce error? I know what you're thinking, if you don't let the tool temp stabilize you could start printing at the wrong temps, but fear not, assuming you aren't drastically wrong in your preheat time selection (in which case you were already going to have issues) the error should be no more than a degree or two. Furthermore, statically preheating your tool before you begin pushing plastic was always going to introduce error at or exceeding this magnitude once plastic extrusion begins and the melting strips heat off of your toolhead.
+    - the tool/bed temperature setting logic at the beginning of the print
+        - if you examine the gcode output of ss setup for tool changers there is a block of temperature setting that is inserted in the "start" section of the gcode output, it is difficult to control how that block gets generated by ss settings alone, so this script removes it entirely
+        - initial tool/bed temperature setting logic is reintroduced by this process script and is described below
+        - note that the initial bed temperature is set to the highest first layer bed temperature of all tools used in the print
+    - the tool/bed temperature setting logic at the transition from layer 1 to 2
+        - at the beginning of the second layer ss will change the temperature of the tool and/or bed if they are configured to use a different temperature for first layer vs other layers, this is fine when you have just one tool, but becomes clunky when there is more than one tool used in a print, this logic is eliminated
+        - it is replaced with temperature changes for the active tool to its other layer temperature and for the bed to the highest other layer temperature of all tools used in the print
+        - all other tool temperature transitions from first layer temperatures to other layer temperatures are built into the preheat logic, which is to say that if the tool is being preheated for use in the first layer it will be preheated to its first layer temperature and then set to that temperature again upon its selection, otherwise it will be preheated/set to its other layer temperature
+    - the standard ss pre-dropoff tool temperature drop logic
+        - I believe this is only relevant if you have ooze prevention enabled, but ss will drop the temperature of the current tool right before dropoff, this is eliminated
+        - this logic is replaced by more sophisticated logic that looks forward in the print to determine if a tool is used again and if so how long it will be before it is picked up again
+
+
+
+
+
+
 
 # Final Notes:
 - feel free to bug me with questions or requests, response times may vary!
