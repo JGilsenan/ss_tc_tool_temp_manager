@@ -44,7 +44,7 @@ First and foremost, this is not a comprehensive guide to setting up ss for multi
             - `WARMUP_TIME`
                 - this designates how much time this extruder should be given to warm up before it is needed, if it is starting at the idle temperature (tool temperature if used now - ooze prevention offset) and transitioning to the temp it will be used at
                 - example: `WARMUP_TIME=30`
-                - this defaults to `30` if not provided
+                - this defaults to `30` if not provided, though the actual time varies by hotend and will most likely be lower
             - `WARMUP_FROM_OFF_TIME`
                 - this designates how much time this extruder should be given to warm up to use temperature if it is off currently
                 - example: `WARMUP_FROM_OFF_TIME=110`
