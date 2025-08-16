@@ -38,7 +38,7 @@ First and foremost, this is not a comprehensive guide to setting up ss for multi
     - filament settings --> custom g-code --> start g-code
         - Putting anything in this section is optional and not required
         - If you choose to use this section, you can utilize it to set the following extruder-specific variables for the post process script to use:
-            - NOTE: if you want to set any variables here, then you must set somewhere in this section:
+            - IMPORTANT: if you want to set any variables here, then you must set somewhere in this section:
                 - `EXTRUDER={current_extruder}`
                 - this is how the script identifies the extruder that the variables belong to
             - `WARMUP_TIME`
