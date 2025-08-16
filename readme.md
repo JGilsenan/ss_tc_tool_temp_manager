@@ -150,7 +150,7 @@ There's nothing more to do, once ss has referenced the script it will automatica
     - if the outgoing tool is used again in less than the configured `DORMANT_TIME` its temperature is set to its print temperature adjusted by the ooze prevention temperature
 - generates and inserts preheat code
     - the logic behind this is:
-        - first, all gcode lines in the print are assigned a score that roughly approximates their "time" using a naive approach that takes total print time, subtracts the time constants used by ss for print start and tool changes
+        - first, all gcode lines in the print are assigned a score that roughly approximates their "time" using a naive approach that takes total print time, subtracts the time constants used by ss for print start and all of the tool changes, and divides it by the number of gcode lines to get a rough time score per line -- there's a bit more to it than that, and expect that this is an area where I will improve things in the future, I didn't take the time yet to write a better algorithm for approximating command times. 
         - next, the algorithm looks at each toolchange event, examines which tool is being selected, and based on the configurations provided determines the time ahead of the tool selection at which preheating should occur
         - the algorithm then walks back through the gcode to approximate where to place the preheat event with the following caveats:
             - if it reaches the start of the print the tool will be preheated at the start
