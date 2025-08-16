@@ -28,7 +28,7 @@ At the time of creating this project ss, while supporting multiple extruder prin
 First and foremost, this is not a comprehensive guide to setting up ss for multiple extruders, at least not for now, but it is pretty close, and assuming that you managed to locate the docs for prusa slicer and have set up your configs for basic multi extruder usage this will get you the rest of the way. With that in mind, slicer configuration is only half of the battle, your printer must also be configured properly, I will at some point share my toolchanger configurations that pair with this ss configuration set. The following is a non-exhaustive list of settings that need to be accounted for strictly for the purpose of this script performing as designed:
 -  print settings --> multiple extruders --> ooze prevention
     - whether or not you want this to be enabled (knowing that it adds a part-height skirt), a temperature should be set for this, as it will be used in the preheating of tools
-    - if you choose not to enable ooze prevention, temporarily enable it to set the temperature then disable it again, the value you enter will still be output if you do this
+    - if you choose not to enable ooze prevention, temporarily enable it to set the temperature then disable it again, the value you enter will still be exported if you do this
 -  print settings --> output options --> post-processing script
     - this is where you will reference the post processing script, it is simply the absolute filepath to where you store the script on your computer
 - Filament settings:
