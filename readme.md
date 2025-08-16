@@ -152,7 +152,7 @@ There's nothing more to do, once ss has referenced the script it will automatica
     - the logic behind this is:
         - first, all gcode lines in the print are assigned a score that roughly approximates their "time" using a naive approach that takes total print time, subtracts the time constants used by ss for print start and all of the tool changes, and divides it by the number of gcode lines to get a rough time score per line -- there's a bit more to it than that, and expect that this is an area where I will improve things in the future, I didn't take the time yet to write a better algorithm for approximating command times. 
         - next, the algorithm looks at each toolchange event, examines which tool is being selected, and based on the configurations provided determines the time ahead of the tool selection at which preheating should occur
-        - the algorithm then walks back through the gcode to approximate where to place the preheat event with the following caveats:
+        - the algorithm then walks back through the gcode to approximate where to place the preheat event based on accumulated time score differences, with the following caveats:
             - if it reaches the start of the print the tool will be preheated at the start
             - if it reaches another section where the tool is selected it does not insert a preheat block
         - once an approximate location is found, the script inserts a preheating block that preheats the tool according to what its print temperature will be at the tool selection event that is being preheated for
