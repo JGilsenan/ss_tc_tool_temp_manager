@@ -105,6 +105,7 @@ First and foremost, this is not a comprehensive guide to setting up ss for multi
 There's nothing more to do, once ss has referenced the script it will automatically run it each time you generate gcode
 
 # What it does
+- NOTE: if your print does not have any toolchanges, it does nothing and leaves the gcode as-is, make sure that your ss config is still valid if it doesn't get processed by this script
 - eliminates ss's temperature setting logic that cannot be controlled via settings:
     - the post toolchange/post start filament temperature setting logic that ss uses inserts a set temperature and wait command that can cause long waiting periods in between tool changes while awaiting tool temperature stabilization
         - this logic is removed from the gcode output
