@@ -1,30 +1,3 @@
-# TO DO:
-# TO DO:
-# TO DO:
-# TO DO:
-# TO DO:
-# TO DO:
-- line 687
-    - when you start with T0 make sure and add a 'clean nozzle' step after it has been fully heated
-    - when you start with another tool, add a 'clean nozzle' step in the first tool selection after the tool has been selected
-- process:
-    - make a clean nozzle call the first time a tool is used
-- external:
-    - create a refined clean nozzle macro that can be safely run even if printing already started by noting current position, moving above the brush, dropping onto the brush, cleaning the nozzle, then raising up above the print line, then going to current pos previously noted
-
-
-
-# TO DO:
-# TO DO:
-# TO DO:
-# TO DO:
-# TO DO:
-# TO DO:
-- add param to toolchange gcode section that users can set for clean nozzle upon toolchange
-
-
-
-
 # Intro:
 This is a post processing script designed for use with superslicer (ss) and klipper, in particular printers setup to use klipper-toolchanger. (for example my Voron 350 build)
 
@@ -38,17 +11,17 @@ At the time of creating this project ss, while supporting multiple extruder prin
 
 ## Assumptions, setting expectations, and pre-requisites:
 - it is important to note that if you are generating gcode that uses a single tool and:
-    - it is T0: there will be no modifications to the output gcode
-    - it is not T0: there will be modifications to the output gcode, forcing T0 for `PRINT_START`
-- likewise, even if T0 is not used in a print, it will be selected and used for `PRINT_START`
+    - it is `T0`: there will be no modifications to the output gcode
+    - it is not `T0`: there will be modifications to the output gcode, forcing `T0` for `PRINT_START`
+- likewise, even if `T0` is not used in a print, it will be selected and used for `PRINT_START`
 - you already have ss setup just how you like it, or at least functionally and you have tested it (this isn't a how-to for ss toolchangers for someone coming from a different slicer)
 - your install and configs for klipper-toolchanger use the following standard macro naming conventions:
     - `PRINT_START` for the start of your print (note: no variables should be passed to your `PRINT_START` for this script to work properly)
     - PRINT_END for the end of your print
     - T[Tool number] for performing a tool change
     - `CLEAN_NOZZLE` for a nozzle cleaning routine
-- you have configured your toolchanger such that ALL homing, bed mesh, QGL, etc MUST be performed using T0, regardless of whether or not T0 is used in a given print
-- you are okay with preheating the bed to `first_layer_bed_temperature` and T0 to 150C prior to any homing, QGL, bed mesh, etc routines performed in your `PRINT_START` macro, this script adds this behavior.
+- you have configured your toolchanger such that ALL homing, bed mesh, QGL, etc MUST be performed using `T0`, regardless of whether or not `T0` is used in a given print
+- you are okay with preheating the bed to `first_layer_bed_temperature` and `T0` to 150C prior to any homing, QGL, bed mesh, etc routines performed in your `PRINT_START` macro, this script adds this behavior.
 
 # Superslicer setup
 
@@ -148,7 +121,40 @@ There's nothing more to do, once ss has referenced the script it will automatica
     - the standard ss pre-dropoff tool temperature drop logic
         - I believe this is only relevant if you have ooze prevention enabled, but ss will drop the temperature of the current tool right before dropoff, this is eliminated
         - this logic is replaced by more sophisticated logic that looks forward in the print to determine if a tool is used again and if so how long it will be before it is picked up again
-
+- regenerates a "start" section composed of the following:
+    - pre-start
+        - selects `T0`
+        - sets `T0` temperature to 150C and sets bed temperature, waits for both to be reached
+        - calls `CLEAN_NOZZLE` for initial nozzle cleaning
+    - start
+        - adds a simplified start gcode section containing only a call to `PRINT_START`
+    - if `T0` is the first tool used
+        - adds heatup command
+        - adds `CLEAN_NOZZLE` called upon reaching print temperature
+    - if `T0` is not the first tool used
+        - adds heatup and wait for the first tool
+        - adds code for selecting the first tool
+        - adds `CLEAN_NOZZLE` called upon selecting the first tool
+        - creates preheat logic and adds a preheat section before `PRINT_START` is called
+- performs temperature changes for second layer
+    - sets bed temperature to the maximum other layer bed temperature of tools used in the print
+    - sets the tool temperature of the currently selected tool to other layer temperature
+- regenerates each toolchange gcode section as follows:
+    - sets the temperature of the incoming tool to its print temperature (without wait, since tool is preheated)
+    - selects the incoming tool
+    - verifies tool detected
+    - depending on configuration performs the `CLEAN_NOZZLE` macro
+    - if the outgoing tool is not used again its temperature is set to 0
+    - if the outgoing tool is not used for more than the configured `DORMANT_TIME` its temperature is set to 0
+    - if the outgoing tool is used again in less than the configured `DORMANT_TIME` its temperature is set to its print temperature adjusted by the ooze prevention temperature
+- generates and inserts preheat code
+    - the logic behind this is:
+        - first, all gcode lines in the print are assigned a score that roughly approximates their "time" using a naive approach that takes total print time, subtracts the time constants used by ss for print start and tool changes
+        - next, the algorithm looks at each toolchange event, examines which tool is being selected, and based on the configurations provided determines the time ahead of the tool selection at which preheating should occur
+        - the algorithm then walks back through the gcode to approximate where to place the preheat event with the following caveats:
+            - if it reaches the start of the print the tool will be preheated at the start
+            - if it reaches another section where the tool is selected it does not insert a preheat block
+        - once an approximate location is found, the script inserts a preheating block that preheats the tool according to what its print temperature will be at the tool selection event that is being preheated for
 
 
 

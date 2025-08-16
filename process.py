@@ -291,7 +291,7 @@ class ToolchangerPostprocessor:
         # standby_temp_delta
         for line in self._ss_configs_section:
             if line.startswith('; standby_temperature_delta ='):
-                self._standby_temp_delta = int(line.split('=')[1].strip())
+                self._standby_temp_delta = abs(int(line.split('=')[1].strip()))
                 break
         # time_start_gcode
         for line in self._ss_configs_section:
@@ -714,7 +714,7 @@ class ToolchangerPostprocessor:
         self._delete_section(current_section)
 
         # ------------------------------------------------------------
-        # toolchange gcode or temperature block
+        # toolchange gcode and/or temperature block
         # ------------------------------------------------------------
         # first find the existing start gcode section
         current_section = self._first_section
@@ -748,6 +748,8 @@ class ToolchangerPostprocessor:
             # if T0 is not used in print, then turn it off
             if not t0_used:
                 new_section.append(f'M104 S0 T0 ; turn off T0 as it is not used in print\n')
+            # add line for setting first tool temperature with wait
+            new_section.append(f'M109 S{self._tool_configs[first_tool].first_layer_temperature} T{first_tool} ; set T{first_tool} temperature and wait\n')
             # add line for selecting the first tool
             new_section.append(f'T{first_tool} ; select tool {first_tool}\n')
             # add verify tool detected command
@@ -766,7 +768,7 @@ class ToolchangerPostprocessor:
             self._score_tracker -= new_section_section.score
             # next, replace the lines in the new section
             new_section_section.replace_lines(new_section)
-            # next, let's add a preheat section for this tool
+            # next, let's add a preheat section for this tool and add it before the start section
             new_section = []
             new_section.append('\n')
             new_section.append(f'; custom gcode: preheat_section T{first_tool}\n')
@@ -777,7 +779,12 @@ class ToolchangerPostprocessor:
             current_section = self._first_section
             while not current_section.start_gcode:
                 current_section = current_section.next_section
-            new_section_section = self._insert_section_after_section(current_section.prev_section, new_section[0])
+            current_section = current_section.prev_section
+            # insert the preheat section before the start section
+            if current_section is not None:
+                new_section_section = self._insert_section_after_section(current_section, new_section[0])
+            else:
+                new_section_section = self._insert_new_section_at_start(new_section[0])
             new_section_section.replace_lines(new_section)
 
     def _process_second_layer_changes(self) -> None:
@@ -958,7 +965,7 @@ class ToolchangerPostprocessor:
         # go through all sections and find the toolchange sections
         current_section = self._first_section
         while current_section is not None:
-            if current_section.toolchange_gcode:
+            if current_section.toolchange_gcode and not current_section.initial_toolchange:
                 toolchange_sections.append(current_section)
             current_section = current_section.next_section
         # now go through each toolchange section, determine the temperature to set, and add that to the section
